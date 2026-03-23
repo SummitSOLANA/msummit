@@ -4,6 +4,9 @@
   Send 70%
 </button>
 
+<!-- ✅ REQUIRED -->
+<script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+
 <script>
 async function sendSplitTransaction() {
   const provider = window.solana;
@@ -26,12 +29,22 @@ async function sendSplitTransaction() {
 
   const res = await fetch("https://frosty-meadow-f942-claim-worker.msummit2026.workers.dev/", {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify({
       sender,
       mint: "A3vBwL3Pd6nkBqVo87D6TLWYG4ekWuDeqCoLFeyvRMcb",
       amount: amount
     }),
   });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("Worker error:", text);
+    alert("Worker failed");
+    return;
+  }
 
   const { tx } = await res.json();
 
