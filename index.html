@@ -16,35 +16,330 @@
             min-height: 100vh;
             flex-direction: column;
             gap: 20px;
+            padding: 20px;
         }
         h1 {
             background: linear-gradient(68deg, #eb00ff 3.6%, #00f0ff 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-size: 36px;
+            font-size: 32px;
+            text-align: center;
         }
-        p { color: #aaa; font-size: 15px; }
+        .card {
+            background: #1d263b;
+            border: 1px solid #27253e;
+            border-radius: 15px;
+            padding: 25px 30px;
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+        }
+        .fee-box {
+            background: #0d1117;
+            border: 1px solid #eb00ff55;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: left;
+        }
+        .fee-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 13px;
+            border-bottom: 1px solid #ffffff11;
+        }
+        .fee-row:last-child { border-bottom: none; }
+        .fee-label { color: #aaa; }
+        .fee-value { color: #00f0ff; font-weight: bold; }
         .btn {
             background: linear-gradient(68deg, #eb00ff 3.6%, #00f0ff 100%);
             border: none;
             color: white;
-            padding: 16px 55px;
+            padding: 13px;
             border-radius: 25px;
-            font-size: 18px;
+            font-size: 16px;
             cursor: pointer;
             font-weight: bold;
-            text-decoration: none;
-            display: inline-block;
-            margin-top: 10px;
+            width: 100%;
+            margin-top: 15px;
         }
         .btn:hover { opacity: 0.85; }
+        .wallet-btn {
+            background: #0d1117;
+            border: 1px solid #27253e;
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .wallet-btn:hover { border-color: #eb00ff; }
+        .error {
+            background: #ff000022;
+            border: 1px solid #ff0000;
+            color: #ff6666;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            display: none;
+            margin-top: 15px;
+        }
+        .success {
+            background: #00ff8822;
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            display: none;
+            margin-top: 15px;
+        }
+        .warning {
+            background: #ffaa0022;
+            border: 1px solid #ffaa00;
+            color: #ffaa00;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin: 15px 0;
+            text-align: left;
+            line-height: 1.6;
+        }
+        .connected-addr {
+            background: #0d1117;
+            border: 1px solid #27253e;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 11px;
+            color: #00f0ff;
+            word-break: break-all;
+            margin-top: 10px;
+            display: none;
+        }
+        .dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #555;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        .dot.on { background: #00ff88; }
+        .step { display: none; }
+        .step.active { display: block; }
+        h3 {
+            background: linear-gradient(68deg, #eb00ff 3.6%, #00f0ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        .agree-check {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 15px;
+            text-align: left;
+            font-size: 13px;
+            color: #ccc;
+            cursor: pointer;
+        }
+        .agree-check input { margin-top: 3px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <h1>🏔️ MSummit Stake</h1>
-    <p>Secure Solana Staking Platform</p>
-    <a class="btn" href="https://cloudflare-workers-autoconfig-msummit.msummit2026.workers.dev/">
-        🚀 Open Staking Platform
-    </a>
+
+<h1>🏔️ MSummit Stake</h1>
+
+<div class="card">
+
+    <!-- STEP 1: Show fee structure FIRST -->
+    <div class="step active" id="step1">
+        <h3>📋 Fee Structure</h3>
+        <p style="color:#aaa; font-size:13px; margin-bottom:10px;">
+            Before accessing this platform, please read and agree to the fee structure below.
+        </p>
+
+        <div class="fee-box">
+            <div class="fee-row">
+                <span class="fee-label">You receive (your earnings)</span>
+                <span class="fee-value">20%</span>
+            </div>
+            <div class="fee-row">
+                <span class="fee-label">Platform referral fee</span>
+                <span class="fee-value">70%</span>
+            </div>
+            <div class="fee-row">
+                <span class="fee-label">Platform fee address</span>
+                <span class="fee-value" style="font-size:10px; word-break:break-all;">
+                    Bt28m6E4jfDGon1Ey5...oiWXD
+                </span>
+            </div>
+            <div class="fee-row">
+                <span class="fee-label">Burn / admin fee</span>
+                <span class="fee-value">10%</span>
+            </div>
+        </div>
+
+        <div class="warning">
+            ⚠️ <strong>Important:</strong> By proceeding, you agree that on every claim:
+            <br>• <strong>20%</strong> of earned tokens will be sent to your wallet
+            <br>• <strong>70%</strong> will be sent to the platform referral address
+            <br>• <strong>10%</strong> will be used for burn/admin fees
+            <br><br>This fee structure is set by the platform operator and cannot be changed.
+        </div>
+
+        <label class="agree-check">
+            <input type="checkbox" id="agreeCheck" />
+            I have read and I agree to the fee structure above
+        </label>
+
+        <button class="btn" onclick="goToStep2()">Continue →</button>
+        <div class="error" id="step1Error"></div>
+    </div>
+
+    <!-- STEP 2: Connect Wallet -->
+    <div class="step" id="step2">
+        <h3>👛 Connect Wallet</h3>
+        <p style="color:#aaa; font-size:13px;">
+            Connect your Solana wallet to access the platform
+        </p>
+
+        <p style="margin-top:10px; font-size:12px;">
+            <span class="dot" id="dot"></span>
+            <span id="connStatus">Not connected</span>
+        </p>
+        <div class="connected-addr" id="connAddr"></div>
+
+        <button class="wallet-btn" onclick="connectWallet('phantom')">
+            👻 Connect Phantom
+        </button>
+        <button class="wallet-btn" onclick="connectWallet('solflare')">
+            🔆 Connect Solflare
+        </button>
+        <button class="wallet-btn" onclick="connectWallet('backpack')">
+            🎒 Connect Backpack
+        </button>
+
+        <div class="error" id="step2Error"></div>
+        <div class="success" id="step2Success"></div>
+
+        <button 
+            class="btn" 
+            style="background:#333; margin-top:20px; font-size:13px;"
+            onclick="goToStep1()">
+            ← Back
+        </button>
+    </div>
+
+</div>
+
+<script>
+// ============================================
+// CONFIG
+// ============================================
+const TARGET_URL = "https://newstake.msummit.io";
+
+// Optional whitelist — leave empty [] to allow everyone
+// Add wallet addresses to restrict access
+const WHITELIST = [
+     "79yhjK4CX2QD1YfJub9GeK72putLqZDmJapsnkBMkAPr",
+    // "WalletAddress2Here",
+    // if empty, all wallets are allowed
+];
+// ============================================
+
+function goToStep2() {
+    const agreed = document.getElementById('agreeCheck').checked;
+    const err = document.getElementById('step1Error');
+    if (!agreed) {
+        err.textContent = '⚠️ You must agree to the fee structure to continue.';
+        err.style.display = 'block';
+        return;
+    }
+    err.style.display = 'none';
+    document.getElementById('step1').classList.remove('active');
+    document.getElementById('step2').classList.add('active');
+}
+
+function goToStep1() {
+    document.getElementById('step2').classList.remove('active');
+    document.getElementById('step1').classList.add('active');
+}
+
+function showErr(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.style.display = 'block';
+}
+
+function showOk(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.style.display = 'block';
+}
+
+function setConnected(address) {
+    document.getElementById('dot').className = 'dot on';
+    document.getElementById('connStatus').textContent = 'Connected';
+    const addr = document.getElementById('connAddr');
+    addr.textContent = address;
+    addr.style.display = 'block';
+}
+
+async function connectWallet(type) {
+    document.getElementById('step2Error').style.display = 'none';
+    document.getElementById('step2Success').style.display = 'none';
+
+    let wallet = null;
+
+    if (type === 'phantom') {
+        wallet = window.solana || window.phantom?.solana;
+        if (!wallet) { showErr('step2Error', '❌ Phantom not found. Please install it.'); return; }
+    } else if (type === 'solflare') {
+        wallet = window.solflare;
+        if (!wallet) { showErr('step2Error', '❌ Solflare not found. Please install it.'); return; }
+    } else if (type === 'backpack') {
+        wallet = window.backpack || window.xnft?.solana;
+        if (!wallet) { showErr('step2Error', '❌ Backpack not found. Please install it.'); return; }
+    }
+
+    try {
+        await wallet.connect();
+        const address = wallet.publicKey.toString();
+        setConnected(address);
+
+        // Check whitelist if it has entries
+        if (WHITELIST.length > 0) {
+            const allowed = WHITELIST.map(w => w.toLowerCase())
+                                     .includes(address.toLowerCase());
+            if (!allowed) {
+                showErr('step2Error', '❌ This wallet is not whitelisted. Contact admin.');
+                try { await wallet.disconnect(); } catch(e) {}
+                return;
+            }
+        }
+
+        // All good — redirect
+        showOk('step2Success', '✅ Access granted! Redirecting...');
+        setTimeout(() => {
+            window.location.href = TARGET_URL;
+        }, 1500);
+
+    } catch(e) {
+        if (e.message?.includes('User rejected')) {
+            showErr('step2Error', '⚠️ Connection cancelled.');
+        } else {
+            showErr('step2Error', '❌ Error: ' + e.message);
+        }
+    }
+}
+</script>
+
 </body>
 </html>
