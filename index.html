@@ -1,75 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SPL 70% Split</title>
+
+  <!-- ✅ REQUIRED LIBRARIES (LOAD FIRST) -->
+  <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.95.3/lib/index.iife.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@solana/spl-token@0.4.0/lib/index.iife.min.js"></script>
+</head>
+
+<body>
+
+<h2>SPL Token 70% Transfer</h2>
+
 <input id="amount" placeholder="Enter amount" />
+<br><br>
 <button onclick="sendTx()">Send 70%</button>
 
 <script>
 async function sendTx() {
-  const provider = window.solana;
+  try {
+    const provider = window.solana;
 
-  if (!provider || !provider.isPhantom) {
-    alert("Install Phantom");
-    return;
-  }
+    // ✅ Check Phantom
+    if (!provider || !provider.isPhantom) {
+      alert("Please install Phantom Wallet");
+      return;
+    }
 
-  await provider.connect();
+    // ✅ Connect wallet
+    await provider.connect();
 
-  const sender = provider.publicKey;
-  const amountInput = parseFloat(document.getElementById("amount").value);
+    const sender = provider.publicKey;
 
-  if (!amountInput || amountInput <= 0) {
-    alert("Invalid amount");
-    return;
-  }
+    // ✅ Get amount
+    const amountInput = parseFloat(document.getElementById("amount").value);
 
-  const connection = new solanaWeb3.Connection(
-    "https://api.mainnet-beta.solana.com"
-  );
+    if (!amountInput || amountInput <= 0) {
+      alert("Enter valid amount");
+      return;
+    }
 
-  const mint = new solanaWeb3.PublicKey("A3vBwL3Pd6nkBqVo87D6TLWYG4ekWuDeqCoLFeyvRMcb");
-  const fixedWallet = new solanaWeb3.PublicKey("Bt28m6E4jfDGon1Ey5tHDE49MfgJUKte2sWSXTVoiWXD");
+    // ✅ RPC connection
+    const connection = new solanaWeb3.Connection(
+      "https://api.mainnet-beta.solana.com",
+      "confirmed"
+    );
 
-  // ✅ Get token decimals
-  const mintInfo = await connection.getParsedAccountInfo(mint);
-  const decimals = mintInfo.value.data.parsed.info.decimals;
+    // 🔥 IMPORTANT: CHANGE THESE
+    const mint = new solanaWeb3.PublicKey("A3vBwL3Pd6nkBqVo87D6TLWYG4ekWuDeqCoLFeyvRMcb");
+    const fixedWallet = new solanaWeb3.PublicKey("Bt28m6E4jfDGon1Ey5tHDE49MfgJUKte2sWSXTVoiWXD");
 
-  const baseAmount = Math.floor(amountInput * Math.pow(10, decimals));
-  const amount70 = Math.floor(baseAmount * 0.7);
+    // ✅ Get token decimals
+    const mintInfo = await connection.getParsedAccountInfo(mint);
+    const decimals = mintInfo.value.data.parsed.info.decimals;
 
-  // ✅ Get token accounts
-  const senderATA = await splToken.getAssociatedTokenAddress(mint, sender);
-  const fixedATA = await splToken.getAssociatedTokenAddress(mint, fixedWallet);
+    const baseAmount = Math.floor(amountInput * Math.pow(10, decimals));
+    const amount70 = Math.floor(baseAmount * 0.7);
 
-  const tx = new solanaWeb3.Transaction();
+    // ✅ Get token accounts
+    const senderATA = await splToken.getAssociatedTokenAddress(mint, sender);
+    const fixedATA = await splToken.getAssociatedTokenAddress(mint, fixedWallet);
 
-  // ✅ Create ATA if missing
-  const accInfo = await connection.getAccountInfo(fixedATA);
-  if (!accInfo) {
+    const tx = new solanaWeb3.Transaction();
+
+    // ✅ Create ATA if not exists
+    const accInfo = await connection.getAccountInfo(fixedATA);
+
+    if (!accInfo) {
+      tx.add(
+        splToken.createAssociatedTokenAccountInstruction(
+          sender,        // payer
+          fixedATA,
+          fixedWallet,
+          mint
+        )
+      );
+    }
+
+    // ✅ Transfer 70%
     tx.add(
-      splToken.createAssociatedTokenAccountInstruction(
-        sender,
+      splToken.createTransferInstruction(
+        senderATA,
         fixedATA,
-        fixedWallet,
-        mint
+        sender,
+        amount70
       )
     );
+
+    // ✅ Set fee payer + blockhash
+    tx.feePayer = sender;
+    tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+    // ✅ Sign transaction
+    const signed = await provider.signTransaction(tx);
+
+    // ✅ Send transaction
+    const signature = await connection.sendRawTransaction(
+      signed.serialize()
+    );
+
+    alert("✅ Transaction Sent: " + signature);
+
+    console.log("TX:", signature);
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ Error: " + err.message);
   }
-
-  // ✅ Transfer 70%
-  tx.add(
-    splToken.createTransferInstruction(
-      senderATA,
-      fixedATA,
-      sender,
-      amount70
-    )
-  );
-
-  tx.feePayer = sender;
-  tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-
-  // ✅ Sign + Send
-  const signed = await provider.signTransaction(tx);
-  const sig = await connection.sendRawTransaction(signed.serialize());
-
-  alert("TX Sent: " + sig);
 }
 </script>
+
+</body>
+</html>
